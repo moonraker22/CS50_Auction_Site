@@ -1,0 +1,53 @@
+{% extends "auctions/layout.html" %}
+{% load prepend_dollars %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1>{{ listing.title }}</h1>
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="{{ listing.image_url }}" class="img-fluid img-thumbnail" />
+                </div>
+                <div class="col-md-6">
+                    <div class="border-bottom mb-2">
+                        <h3>Description</h3>
+                    </div>
+                    <p class="lead">{{ listing.description }}</p>
+                    <p><strong>Starting Bid: {{ listing.starting_bid|prepend_dollars }}</strong></p>
+                    <p><strong>Auctions Ends: {{ listing.end_date }}</strong></p>
+                    <p><strong>{{ listing.seller }}</strong></p>
+                    <br />
+                    <div class="border-bottom mb-2">
+                    {% if bids %}
+                    {% for bid in bids %}
+                        <h3>Bid History</h3>
+                        <p>{{ bid.user }}: {{ bid.amount|prepend_dollars }}</p>
+                    {% endfor %}
+                    {% endif %}
+                        
+                  
+                        
+
+                    </div>
+                    <div class="m-2">
+                    {% if comments %}
+                        <h3>Comments</h3>
+                        {% for comment in comments %}
+                            <div class="card m-2">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ comment.user }}</h5>
+                                    <p class="card-text">{{ comment.text }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                </div>
+           </div>
+            
+        </div>
+
+{% endblock body %}

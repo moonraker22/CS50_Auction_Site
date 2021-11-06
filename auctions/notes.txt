@@ -1,0 +1,44 @@
+Pagination
+                <div class="col-12">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+                
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+                
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+
+
+from django import template
+from django.contrib.humanize.templatetags.humanize import intcomma
+ 
+register = template.Library()
+ 
+@register.filter
+def prepend_dollars(dollars):
+    if dollars:
+        dollars = round(float(dollars), 2)
+        return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
+    else:
+        return ''
+Now in your template, put:
+
+{{ my_float_var | prepend_dollars }}
+
+ <div class="col-md-4">
+      <h3>{{ listing.title }}</h3>
+      <p>{{ listing.description }}</p>
+      <p>Starting Bid: {{ listing.starting_bid|prepend_dollars }}</p>
+      <p>Ending: {{ listing.ending|date:"F j, Y, g:i a" }}</p>
+      <p>
+        <a href="{{ listing.get_absolute_url }}" class="btn btn-primary">View Listing</a>
+      </p>
