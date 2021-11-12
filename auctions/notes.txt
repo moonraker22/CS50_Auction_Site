@@ -42,3 +42,18 @@ Now in your template, put:
       <p>
         <a href="{{ listing.get_absolute_url }}" class="btn btn-primary">View Listing</a>
       </p>
+       <h3 class="text-center">{{ listing.title }}</h3>
+            <div class="mt-2 mb-2">
+                <img class="img-fluid img-thumbnail" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+            </div>
+            <p>{{ listing.description }}</p>
+            <p>{{ listing.starting_bid|prepend_dollars }}</p>
+            <p>Start Date: {{ listing.start_date }}</p>
+            <p>End Date: {{ listing.end_date }}</p>
+            <p>{{ listing.user.username }}</p>
+            <p>{{ listing.user.email }}</p>
+            <p>{{ listing.catagory }}</p>
+
+            <a href="{{ listing.get_absolute_url }}" class="btn btn-primary">View Listing</a>
+
+           

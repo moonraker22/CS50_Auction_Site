@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.text import slugify
 
 # one for auction listings, one for bids, and one for comments made on auction listings.
 #  They should be able to specify a title for the listing, a text-based description, and
@@ -57,6 +58,12 @@ class Listing(models.Model):
         verbose_name_plural = "Listings"
         ordering = ("-starting_bid",)
 
+    def get_current_bid(self):
+        try:
+            return Bid.objects.all().filter(listing=self).order_by("-amount")[0]
+        except IndexError:
+            return None
+
     def get_absolute_url(self):
         return reverse("listing_detail", args=[self.slug])
 
@@ -78,6 +85,11 @@ class Bid(models.Model):
             "-amount",
         )
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.user} bid ${self.amount}")
+            super().save(*args, **kwargs)
+
     def place_bid(self, bid_amount):
         if bid_amount > self.listing.current_bid:
             self.amount = bid_amount
@@ -92,7 +104,7 @@ class Bid(models.Model):
         return reverse("bid_detail", args=[self.slug])
 
     def __str__(self):
-        return f"{self.user} bid {self.amount} on {self.listing}"
+        return f"{self.user} bid ${self.amount}"
 
 
 class Comment(models.Model):

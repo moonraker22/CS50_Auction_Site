@@ -21,33 +21,30 @@
                     <p><strong>{{ listing.seller }}</strong></p>
                     <br />
                     <div class="border-bottom mb-2">
-                    {% if bids %}
-                    {% for bid in bids %}
+                        {% if bids %}
+                        {% for bid in bids %}
                         <h3>Bid History</h3>
                         <p>{{ bid.user }}: {{ bid.amount|prepend_dollars }}</p>
-                    {% endfor %}
-                    {% endif %}
-                        
-                  
-                        
-
+                        {% endfor %}
+                        {% endif %}
                     </div>
                     <div class="m-2">
-                    {% if comments %}
+                        {% if comments %}
                         <h3>Comments</h3>
                         {% for comment in comments %}
-                            <div class="card m-2">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ comment.user }}</h5>
-                                    <p class="card-text">{{ comment.text }}</p>
-                                </div>
+                        <div class="card m-2">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ comment.user }} said:</h5>
+                                <p class="card-text">{{ comment.text }}</p>
+                                <p class="card-text"><small class="text-muted">{{ comment.created }}</small></p>
                             </div>
+                        </div>
                         {% endfor %}
-                    {% endif %}
+                        {% endif %}
                     </div>
                 </div>
-           </div>
-            
+            </div>
+
         </div>
 
-{% endblock body %}
+        {% endblock body %}

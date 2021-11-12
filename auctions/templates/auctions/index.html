@@ -1,34 +1,36 @@
 {% extends "auctions/layout.html" %}
 {% load prepend_dollars %}
-
 {% block body %}
 <div class="container">
-  <div class="row">
-    <p class="display-3 text-center">Active Listings</p>
-   <div class="row">
-    {% for listing in listings %}
-    {% if listing.is_active  %}
-        <div class="col-md-4">
-            <h3 class="text-center">{{ listing.title }}</h3>
-            <div class="mt-2 mb-2">
-                <img class="img-fluid img-thumbnail" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+    <div class="row">
+        <p class="display-3 text-center">Active Listings</p>
+        <div class="row">
+            {% for listing in listings %} {% if listing.is_active %}
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <img class="card-img-top" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                    <div class="card-body">
+                        <p class="card-text"><strong>{{ listing.title }}</strong></p>
+                        <p class="card-text">{{ listing.description }}</p>
+                        <p class="card-text">Starting Bid: {{ listing.starting_bid|prepend_dollars }}</p>
+                        {% if listing.get_current_bid %}
+                        <p>{{ listing.get_current_bid }}</p>
+                        {% else %}
+                        <p>No bids yet</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <a href="{{ listing.get_absolute_url }}"
+                                    class="btn btn-sm btn-outline-secondary">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <p>{{ listing.description }}</p>
-            <p>{{ listing.starting_bid|prepend_dollars }}</p>
-            <p>Start Date: {{ listing.start_date }}</p>
-            <p>End Date: {{ listing.end_date }}</p>
-            <p>{{ listing.user.username }}</p>
-            <p>{{ listing.user.email }}</p>
-            <p>{{ listing.catagory }}</p>
-
-            <a href="{{ listing.get_absolute_url }}" class="btn btn-primary">View Listing</a>
-
-           
+            {% endif %}
+            {% endfor %}
         </div>
-    {% endif %}
-    {% endfor %}
-
-  </div>
-  </div>
-  </div>
+    </div>
+</div>
 {% endblock %}

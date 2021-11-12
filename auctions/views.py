@@ -12,12 +12,13 @@ from django.views.generic import (
     ListView,
     DetailView,
 )
-from .models import Listing, Bid, Comment, Category, User, Watchlist
+from django.views.generic.detail import SingleObjectMixin
+from .models import Listing, Bid, Comment, Category, User
 from .models import User
 
 
-# def index(request):
-#     return render(request, "auctions/index.html")
+def catagories(request):
+    return {"categories": Category.objects.all()}
 
 
 def login_view(request):
@@ -86,8 +87,14 @@ class Index(ListView):
         return Listing.objects.all().filter(is_active=True)
         # return Listing.objects.active()
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["categories"] = Category.objects.all()
+        context["bids"] = Bid.objects.all()
+        return context
 
-class ListingDetail(DetailView):
+
+class ListingDetail(DetailView, SingleObjectMixin):
     model = Listing
     template_name = "auctions/listing_detail.html"
     context_object_name = "listing"
@@ -97,3 +104,16 @@ class ListingDetail(DetailView):
         context["bids"] = Bid.objects.filter(listing=self.object)
         context["comments"] = Comment.objects.filter(listing=self.object)
         return context
+
+
+class CreateListing(CreateView):
+    model = Listing
+    fields = ["title", "description", "starting_bid", "image_url", "category"]
+    template_name = "auctions/create_listing.html"
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("listing_detail", kwargs={"slug": self.object.slug})
