@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.text import slugify
+from django.utils import timezone
 
 # one for auction listings, one for bids, and one for comments made on auction listings.
 #  They should be able to specify a title for the listing, a text-based description, and
@@ -57,6 +58,18 @@ class Listing(models.Model):
     class Meta:
         verbose_name_plural = "Listings"
         ordering = ("-starting_bid",)
+
+    def add_to_watchlist(self, user, Watchlist):
+        try:
+            obj = Watchlist.objects.get(user=user, listing=self)
+            if obj:
+                return False
+            else:
+                obj = Watchlist(user=user, listing=self)
+                obj.save()
+                return True
+        except:
+            return False
 
     def get_current_bid(self):
         try:
@@ -129,12 +142,23 @@ class Comment(models.Model):
 
 class Watchlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
+    listing = models.ForeignKey(
+        Listing,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="watchlist",
+    )
     created = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(max_length=50)
 
     class Meta:
         ordering = ("-created",)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.user}-{self.listing}")
+            super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("watchlist_detail", args=[self.slug])

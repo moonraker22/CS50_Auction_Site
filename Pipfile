@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 Django = "*"
 crispy-bootstrap5 = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 

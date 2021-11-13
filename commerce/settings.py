@@ -66,6 +66,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "auctions.views.catagories",
+                "auctions.views.watchlist",
             ],
         },
     },

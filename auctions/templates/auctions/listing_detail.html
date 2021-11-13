@@ -1,5 +1,6 @@
 {% extends "auctions/layout.html" %}
 {% load prepend_dollars %}
+{% load add_watchlist %}
 
 {% block body %}
 <div class="container">
@@ -10,6 +11,12 @@
             <div class="row">
                 <div class="col-md-6">
                     <img src="{{ listing.image_url }}" class="img-fluid img-thumbnail" />
+                    <br />
+                    <div>
+
+                        <btn class="btn btn-primary" id="addToWatchlist" value="{{ listing.id }}">Add to Watchlist</btn>
+
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <div class="border-bottom mb-2">
@@ -20,7 +27,7 @@
                     <p><strong>Auctions Ends: {{ listing.end_date }}</strong></p>
                     <p><strong>{{ listing.seller }}</strong></p>
                     <br />
-                    <div class="border-bottom mb-2">
+                    <div class=" border-bottom mb-2">
                         {% if bids %}
                         {% for bid in bids %}
                         <h3>Bid History</h3>
@@ -48,3 +55,31 @@
         </div>
 
         {% endblock body %}
+        {% block scripts %}
+        <script>
+        const addToWatchlist = document.getElementById('addToWatchlist');
+        addToWatchlist.addEventListener('click', function () {
+              fetch('{% url "add_to_watchlist" %}', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({
+                  listing_id: '{{ listing.id }}',
+                  user: '{{ user }}',
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                })
+              }).then(r => r.json().then(data => (
+                  {status: r.status, body: data})
+                  )).then(data => {
+                    if (data.status === 200) {
+                      addToWatchlist.innerHTML = 'Added to Watchlist';
+                      addToWatchlist.classList.add('btn-success');
+                      addToWatchlist.classList.remove('btn-primary');
+                    }
+                  })
+              .catch(error => console.error(error));
+              });
+        </script>
+        {% endblock scripts %}

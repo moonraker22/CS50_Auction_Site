@@ -33,4 +33,9 @@
         </div>
     </div>
 </div>
+<div class="">
+    {% for w in watchlist %}
+    {{w.listing.title}}
+    {% endfor %}
+</div>
 {% endblock %}

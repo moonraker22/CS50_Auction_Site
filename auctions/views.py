@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -5,6 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.views.generic import (
     CreateView,
     UpdateView,
@@ -12,13 +14,39 @@ from django.views.generic import (
     ListView,
     DetailView,
 )
-from django.views.generic.detail import SingleObjectMixin
-from .models import Listing, Bid, Comment, Category, User
-from .models import User
+from django.views.decorators.csrf import csrf_exempt
+from .models import Listing, Bid, Comment, Category, User, Watchlist
 
 
 def catagories(request):
     return {"categories": Category.objects.all()}
+
+
+def watchlist(request):
+    if request.user.is_authenticated:
+        return {"watchlist": Watchlist.objects.filter(user=request.user)}
+
+
+@csrf_exempt
+def add_to_watchlist(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            post_data = json.loads(request.body.decode("utf-8"))
+            listing_id = post_data.get("listing_id")
+            listing = Listing.objects.filter(id=listing_id).first()
+            user = request.user
+            try:
+                obj = Watchlist.objects.filter(user=user, listing=listing).first()
+                if obj:
+                    return JsonResponse({"success": True})
+                else:
+                    obj = Watchlist(user=user, listing=listing)
+                    obj.save()
+                    return JsonResponse({"success": True})
+            except:
+                return JsonResponse({"success": False})
+        else:
+            return JsonResponse({"success": False})
 
 
 def login_view(request):
@@ -94,7 +122,7 @@ class Index(ListView):
         return context
 
 
-class ListingDetail(DetailView, SingleObjectMixin):
+class ListingDetail(DetailView):
     model = Listing
     template_name = "auctions/listing_detail.html"
     context_object_name = "listing"
@@ -114,6 +142,34 @@ class CreateListing(CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("listing_detail", kwargs={"slug": self.object.slug})
+
+
+class ListingUpdate(UpdateView):
+    model = Listing
+    fields = ["title", "description", "starting_bid", "image_url", "category"]
+    template_name = "auctions/create_listing.html"
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("listing_detail", kwargs={"slug": self.object.slug})
+
+
+class EditListing(LoginRequiredMixin, UpdateView):
+    model = Listing
+    fields = ["title", "description", "starting_bid", "image_url", "category"]
+    template_name = "auctions/edit_listing.html"
+
+    def get_object(self, queryset=None):
+        listing = super().get_object(queryset)
+        if listing.user != self.request.user:
+            raise Http404
+        return listing
 
     def get_success_url(self):
         return reverse("listing_detail", kwargs={"slug": self.object.slug})

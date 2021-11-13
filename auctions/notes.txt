@@ -17,6 +17,29 @@ Pagination
                     </span>
                 </div>
 
+ <div>
+                <div class="" >
+    
+                    <ul class="pagination">
+                        {% if books.has_previous %}
+                            <li><a href="{% url 'filter_and_pagination:listing' %}?page={{books.previous_page_number}}"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                        {% endif %}
+    
+                        {% for num in books.paginator.page_range %}
+                            {% if books.number == num %}
+                                <li class="active"><a href="{% url 'filter_and_pagination:listing' %}?page={{num}}">{{num}}</a></li>
+                            {% elif num > books.number|add:'-3' and num < books.number|add:'3' %}
+                                <li><a href="{% url 'filter_and_pagination:listing' %}?{{filter_url}}&page={{num}}">{{num}}</a></li>
+                            {% endif %}
+                        {% endfor %}
+    
+                        {% if books.has_next %}
+                            <li><a href="{% url 'filter_and_pagination:listing' %}?page={{books.next_page_number}}"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                        {% endif %}
+                        
+                    </ul>
+                </div>
+            </div>
 
 from django import template
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -57,3 +80,19 @@ Now in your template, put:
             <a href="{{ listing.get_absolute_url }}" class="btn btn-primary">View Listing</a>
 
            
+
+
+class WatchlistManager(models.Manager):
+    def add_item(self, listing, user):
+        if not Watchlist.objects.filter(listing=listing, user=user):
+            entry = Watchlist(listing=listing, user=user)
+            self.save()
+            return True
+
+    def remove_item(self, listing, user):
+        entry = Watchlist(listing=listing, user=user)
+        if entry:
+            entry.delete()
+            return True
+
+     objects = WatchlistManager()
