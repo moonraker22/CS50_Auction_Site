@@ -3,24 +3,28 @@
 {% block body %}
 <div class="container">
     <div class="row">
-        <p class="display-3 text-center">Active Listings</p>
+        <p class="display-3 text-center">Watchlist</p>
+        <br />
         <div class="row">
-            {% for listing in listings %} {% if listing.is_active %}
+        {% if not watchlist %}
+            <p class="display-6 text-center">You have no items in your watchlist</p>
+            {% else %}
+            {% for listing in watchlist %} {% if listing.listing.is_active %}
             <div class="col-md-4">
                 <div class="card mb-4 shadow-sm">
-                    <img class="card-img-top" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                    <img class="card-img-top" src="{{ listing.listing.image_url }}" alt="{{ listing.listing.title }}">
                     <div class="card-body">
-                        <p class="card-text"><strong>{{ listing.title }}</strong></p>
+                        <p class="card-text"><strong>{{ listing.listing.title }}</strong></p>
                         <p class="card-text">{{ listing.description }}</p>
-                        <p class="card-text">Starting Bid: {{ listing.starting_bid|prepend_dollars }}</p>
-                        {% if listing.get_current_bid %}
-                        <p>{{ listing.get_current_bid }}</p>
+                        <p class="card-text">Starting Bid: {{ listing.listing.starting_bid|prepend_dollars }}</p>
+                        {% if listing.listing.get_current_bid %}
+                        <p>{{ listing.listing.get_current_bid }}</p>
                         {% else %}
                         <p>No bids yet</p>
                         {% endif %}
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
-                                <a href="{{ listing.get_absolute_url }}"
+                                <a href="{{ listing.listing.get_absolute_url }}"
                                     class="btn btn-sm btn-outline-secondary">View</a>
                             </div>
                         </div>
@@ -30,15 +34,15 @@
             </div>
             {% endif %}
             {% endfor %}
+            {% endif %}
         </div>
     </div>
 </div>
 <div class="">
-{{categories}}
+    {{categories}}
     {% for w in watchlist %}
-    {{w.listing.image_url}}
+    {{w.listing.title}}
     {% endfor %}
-    
     {% for c in categories %}
     {{c.name}}
     {% endfor %}

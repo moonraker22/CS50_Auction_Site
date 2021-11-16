@@ -30,3 +30,18 @@ class CreateListing(forms.ModalForm):
             attrs={"placeholder": "Title", "class": "form-control" "mb-3"}
         ),
     )
+    description = forms.CharField(
+        max_length=1000,
+        label="Description",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Description", "class": "form-control" "mb-3"}
+        ),
+    )
+    starting_bid = forms.DecimalField(
+        label="Starting Bid",
+        widget=forms.NumberInput(
+            attrs={"placeholder": "Starting Bid", "class": "form-control" "mb-3"}
+        ),
+    )
+    category = forms.ChoiceField(
+        choices=[

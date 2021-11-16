@@ -13,9 +13,12 @@
                     <img src="{{ listing.image_url }}" class="img-fluid img-thumbnail" />
                     <br />
                     <div>
-
+                        {% if watchlist_true %}
+                            <btn class="btn btn-outline-success" disabled>Already Watching</btn>
+                        {% else %}
                         <btn class="btn btn-primary" id="addToWatchlist" value="{{ listing.id }}">Add to Watchlist</btn>
-
+                        {% endif %}
+                        {{catagories.name}}
                     </div>
                 </div>
                 <div class="col-md-6">

@@ -22,7 +22,7 @@ class Category(models.Model):
     slug = models.SlugField(max_length=50)
 
     class Meta:
-        verbose_name_plural = "Catagories"
+        verbose_name_plural = "Categories"
         ordering = ("name",)
 
     def get_absolute_url(self):
@@ -161,7 +161,7 @@ class Watchlist(models.Model):
             super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("watchlist_detail", args=[self.slug])
+        return reverse("listing_detail", args=[self.slug])
 
     def __str__(self):
         return f"{self.user} added {self.listing} to watchlist"

@@ -2,6 +2,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
+from django.http.response import Http404
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -18,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Listing, Bid, Comment, Category, User, Watchlist
 
 
-def catagories(request):
+def categories(request):
     return {"categories": Category.objects.all()}
 
 
@@ -85,9 +86,7 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(
-                request, "auctions/register.html", {"message": "Passwords must match."}
-            )
+            return render(request, "auctions/register.html", {"message": "Passwords must match."})
 
         # Attempt to create new user
         try:
@@ -131,6 +130,7 @@ class ListingDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context["bids"] = Bid.objects.filter(listing=self.object)
         context["comments"] = Comment.objects.filter(listing=self.object)
+        context["watchlist_true"] = Watchlist.objects.filter(user=self.request.user, listing=self.object)
         return context
 
 
@@ -173,3 +173,19 @@ class EditListing(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("listing_detail", kwargs={"slug": self.object.slug})
+
+
+class WatchlistView(ListView):
+    model = Listing
+    template_name = "auctions/watchlist.html"
+    context_object_name = "listing"
+    paginate_by = 5
+
+    def get_queryset(self):
+        return Listing.objects.all().filter(is_active=True)
+        # return Listing.objects.active()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["bids"] = Bid.objects.all()
+        return context

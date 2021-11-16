@@ -96,3 +96,19 @@ class WatchlistManager(models.Manager):
             return True
 
      objects = WatchlistManager()
+
+      const addToWatchlist = document.getElementById('addToWatchlist');
+            addToWatchlist.addEventListener('click', function () {
+                $.ajax({
+                        url: "{% url 'add_to_watchlist' %}",
+                        type: 'POST',
+                        data: {
+                            listing_id: addToWatchlist.value,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function (data) {
+                            alert('Added to watchlist');
+                           
+                    }
+                });
+            });
