@@ -48,3 +48,16 @@
     {% endfor %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+    <script> 
+        $(document).ready(function() {
+            $(".text-center").css({
+                "color": "red",
+                "font-size": "20px"
+            });
+            });
+        })
+
+    </script>
+{% endblock scripts %}

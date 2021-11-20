@@ -1,6 +1,7 @@
 {% extends "auctions/layout.html" %}
 {% load prepend_dollars %}
 {% load add_watchlist %}
+{% load crispy_forms_tags %}
 
 {% block body %}
 <div class="container">
@@ -10,15 +11,30 @@
             <br />
             <div class="row">
                 <div class="col-md-6">
-                    <img src="{{ listing.image_url }}" class="img-fluid img-thumbnail" />
+                    <img src="{{ listing.image_url }}" class="img-fluid img-thumbnail mb-4" />
                     <br />
                     <div>
                         {% if watchlist_true %}
-                            <btn class="btn btn-outline-success" disabled>Already Watching</btn>
+                            <btn class="btn btn-outline-success m-3" id="removeFromWatchlist" value="{{ listing.id }}">Remove From Watchlist</btn>
+                            <btn class="btn btn-primary m-3" id="addToWatchlist" value="{{ listing.id }}"
+                                style="display: none">Add to Watchlist
+                            </btn>
+
                         {% else %}
-                        <btn class="btn btn-primary" id="addToWatchlist" value="{{ listing.id }}">Add to Watchlist</btn>
+                            <btn class="btn btn-outline-success m-3" id="removeFromWatchlist" value="{{ listing.id }}"
+                                style="display: none">
+                                Remove From Watchlist</btn>
+
+                            <btn class="btn btn-primary m-3" id="addToWatchlist" value="{{ listing.id }}">Add to
+                                Watchlist</btn>
                         {% endif %}
-                        {{catagories.name}}
+                    </div>
+                    <br />
+                    <div>
+                    {% if is_owner %}
+                        <a href="{% url 'update_listing' listing.slug %}" class="btn btn-primary m-3">Edit Listing</a>
+                        <a href="#" class="btn btn-danger m-3" id="end-auction">End Auction</a>
+                    {% endif %}
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -30,17 +46,35 @@
                     <p><strong>Auctions Ends: {{ listing.end_date }}</strong></p>
                     <p><strong>{{ listing.seller }}</strong></p>
                     <br />
+                    <div class="border-bottom mb-2">
+                        <h3>Place A Bid</h3>
+                        <form class="form-control" role="form" action="{% url 'place_bid' listing.slug %}" method="post">
+                            <div class="form-group">
+                                {% csrf_token %}
+                                {{ bid_form|crispy }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
                     <div class=" border-bottom mb-2">
+                        <h3>Bid History</h3>
                         {% if bids %}
                         {% for bid in bids %}
-                        <h3>Bid History</h3>
                         <p>{{ bid.user }}: {{ bid.amount|prepend_dollars }}</p>
                         {% endfor %}
                         {% endif %}
                     </div>
                     <div class="m-2">
-                        {% if comments %}
+                      
+
+
                         <h3>Comments</h3>
+                        <form action="{% url 'add_a_comment' listing.slug %}" method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <input type="submit" class="btn btn-primary" value="Comment" role="button" />
+                        </form>
+                        {% if comments %}  
                         {% for comment in comments %}
                         <div class="card m-2">
                             <div class="card-body">
@@ -60,6 +94,7 @@
         {% endblock body %}
         {% block scripts %}
         <script>
+        try {
         const addToWatchlist = document.getElementById('addToWatchlist');
         addToWatchlist.addEventListener('click', function () {
               fetch('{% url "add_to_watchlist" %}', {
@@ -77,12 +112,43 @@
                   {status: r.status, body: data})
                   )).then(data => {
                     if (data.status === 200) {
-                      addToWatchlist.innerHTML = 'Added to Watchlist';
-                      addToWatchlist.classList.add('btn-success');
-                      addToWatchlist.classList.remove('btn-primary');
+                        console.log(data.body);
+                        addToWatchlist.style.display = 'none';
+                        document.getElementById('removeFromWatchlist').style.display = 'initial';
                     }
                   })
               .catch(error => console.error(error));
               });
+        } catch (error) {
+            console.log(error);
+        }
+        try {
+        const removeFromWatchlist = document.getElementById('removeFromWatchlist');
+        removeFromWatchlist.addEventListener('click', function () {
+                fetch('{% url "remove_from_watchlist" %}', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'csrfmiddlewaretoken': '{{ csrf_token }}',
+                      },
+                    body: JSON.stringify({
+                      listing_id: '{{ listing.id }}',
+                      user: '{{ user }}',
+                      csrfmiddlewaretoken: '{{ csrf_token }}',
+                    })
+            }).then(r => r.json().then(data => (
+                {status: r.status, body: data})
+                )).then(data => {
+                    if (data.status === 200) {
+                        console.log(data.body);
+                        removeFromWatchlist.style.display = 'none';
+                        document.getElementById('addToWatchlist').style.display = 'initial';
+                      }
+                    })
+                .catch(error => console.error(error));
+                });
+        } catch (error) {
+            console.log(error);
+        }
         </script>
         {% endblock scripts %}

@@ -112,3 +112,46 @@ class WatchlistManager(models.Manager):
                     }
                 });
             });
+
+ # class CreateListing(forms.ModalForm):
+    #     title = forms.CharField(
+    #         min_length=4,
+    #         max_length=100,
+    #         label="Title",
+    #         widget=forms.TextInput(
+    #             attrs={"placeholder": "Title", "class": "form-control" "mb-3"}
+    #         ),
+    #     )
+    #     description = forms.CharField(
+    #         max_length=1000,
+    #         label="Description",
+    #         widget=forms.TextInput(
+    #             attrs={"placeholder": "Description", "class": "form-control" "mb-3"}
+    #         ),
+    #     )
+    #     starting_bid = forms.DecimalField(
+    #         label="Starting Bid",
+    #         widget=forms.NumberInput(
+    #             attrs={"placeholder": "Starting Bid", "class": "form-control" "mb-3"}
+    #         ),
+    #     )
+    #     category = forms.ChoiceField(
+    #         choices=[
+
+
+
+class CreateForm(forms.ModelForm):
+    class Meta:
+        model = Listing
+        fields = ["title", "description", "starting_bid", "category", "image_url", "end_date"]
+
+        widgets = {
+            "title": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control"}),
+            "starting_bid": forms.NumberInput(attrs={"class": "form-control"}),
+            "category": forms.Select(attrs={"class": "form-control"}),
+            "image_url": forms.TextInput(attrs={"class": "form-control"}),
+            "end_date": forms.DateInput(attrs={"class": "form-control"}),
+        }
+
+

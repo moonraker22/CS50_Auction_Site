@@ -5,12 +5,6 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils import timezone
 
-# one for auction listings, one for bids, and one for comments made on auction listings.
-#  They should be able to specify a title for the listing, a text-based description, and
-# what the starting bid should be.Users should also optionally be able to provide a URL
-# for an image for the listing and/or a category (e.g. Fashion, Toys, Electronics, Home,
-# etc.).
-
 
 class User(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
@@ -42,14 +36,14 @@ class Category(models.Model):
 
 class Listing(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
-    title = models.CharField(max_length=50)
-    description = models.TextField()
-    starting_bid = models.DecimalField(max_digits=6, decimal_places=2)
-    history = models.ManyToManyField(User, through="Bid", related_name="bids")
-    image_url = models.URLField(blank=True)
+    title = models.CharField(max_length=50, blank=False)
+    description = models.TextField(blank=True, max_length=500, null=True)
+    starting_bid = models.DecimalField(max_digits=6, decimal_places=2, blank=False)
+    # history = models.ManyToManyField(User, through="Bid", related_name="bids")
+    image_url = models.URLField(blank=True, null=True, default="https://via.placeholder.com/150")
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
-    start_date = models.DateTimeField(auto_now_add=True)
+    start_date = models.DateTimeField()
     end_date = models.DateTimeField(blank=True, null=True)
     slug = models.SlugField(max_length=50)
     # objects = models.Manager()
@@ -83,12 +77,21 @@ class Listing(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.title}-{self.start_date}")
+        if not self.start_date:
+            self.start_date = timezone.now()
+        if not self.end_date:
+            self.end_date = self.start_date + timezone.timedelta(days=7)
+        super().save(*args, **kwargs)
+
 
 class Bid(models.Model):
     amount = models.DecimalField(max_digits=6, decimal_places=2)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    bid_time = models.DateTimeField(auto_now_add=True)
+    bid_time = models.DateTimeField()
     slug = models.SlugField(max_length=50)
 
     class Meta:
@@ -101,6 +104,7 @@ class Bid(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(f"{self.user} bid ${self.amount}")
+            self.bid_time = timezone.now()
             super().save(*args, **kwargs)
 
     def place_bid(self, bid_amount):
@@ -121,17 +125,23 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    text = models.TextField()
+    text = models.CharField(max_length=500, blank=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField()
+    updated = models.DateTimeField(auto_now=True, blank=True)
     slug = models.CharField(max_length=50)
 
     class Meta:
-
-        verbose_name_plural = "Comments"
         ordering = ("-created",)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.user}-{self.listing}-{self.created}")
+            self.user = self.user
+            self.listing = self.listing
+            self.created = timezone.now()
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("comment_detail", args=[self.slug])
@@ -149,7 +159,7 @@ class Watchlist(models.Model):
         null=True,
         related_name="watchlist",
     )
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField()
     slug = models.SlugField(max_length=50)
 
     class Meta:
@@ -158,6 +168,7 @@ class Watchlist(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(f"{self.user}-{self.listing}")
+            self.created = timezone.now()
             super().save(*args, **kwargs)
 
     def get_absolute_url(self):

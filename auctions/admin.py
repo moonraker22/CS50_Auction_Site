@@ -23,14 +23,13 @@ class ListingAdmin(admin.ModelAdmin):
         "starting_bid",
         "category",
         "is_active",
-        "start_date",
         "end_date",
         "image_url",
         "slug",
     )
     list_filter = ("category",)
     search_fields = ("title", "description")
-    prepopulated_fields = {"slug": ("title", "category", "start_date")}
+    prepopulated_fields = {"slug": ("title", "category")}
 
 
 @admin.register(Bid)
