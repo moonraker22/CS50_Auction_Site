@@ -162,6 +162,10 @@ class ListingDetail(DetailView):
         context["is_owner"] = self.request.user == self.object.user
         context["form"] = self.form
         context["bid_form"] = self.bid_form
+        context["is_active"] = self.object.is_active
+        context["highest_bidder"] = Bid.objects.filter(listing=self.object).order_by("-amount").first()
+        context["winner"] = self.object.winner
+        context["is_winner"] = self.request.user == self.object.winner
         return context
 
 
@@ -280,6 +284,8 @@ def close_listing(request, slug):
     listing = Listing.objects.get(slug=slug)
     if listing.user == request.user:
         listing.is_active = False
+        winner = Bid.objects.filter(listing=listing).order_by("-amount").first()
+        listing.winner = winner.user
         listing.save()
         return HttpResponseRedirect(reverse("listing_detail", kwargs={"slug": slug}))
     else:

@@ -1,6 +1,12 @@
 {% extends "auctions/layout.html" %}
 {% load prepend_dollars %}
 {% block body %}
+<style>
+    .image {
+        width: 350px;
+        height: 350px;
+    }
+</style>
 <div class="container">
     <div class="row">
         <p class="display-3 text-center">Watchlist</p>
@@ -9,10 +15,11 @@
         {% if not watchlist %}
             <p class="display-6 text-center">You have no items in your watchlist</p>
             {% else %}
-            {% for listing in watchlist %} {% if listing.listing.is_active %}
+            {% for listing in watchlist %} 
             <div class="col-md-4">
                 <div class="card mb-4 shadow-sm">
-                    <img class="card-img-top" src="{{ listing.listing.image_url }}" alt="{{ listing.listing.title }}">
+                    <img class="card-img-top img-fluid image" src="{{ listing.listing.image_url }}"
+                        alt="{{ listing.listing.title }}">
                     <div class="card-body">
                         <p class="card-text"><strong>{{ listing.listing.title }}</strong></p>
                         <p class="card-text">{{ listing.description }}</p>
@@ -32,20 +39,11 @@
                 </div>
 
             </div>
-            {% endif %}
+            
             {% endfor %}
             {% endif %}
         </div>
     </div>
-</div>
-<div class="">
-    {{categories}}
-    {% for w in watchlist %}
-    {{w.listing.title}}
-    {% endfor %}
-    {% for c in categories %}
-    {{c.name}}
-    {% endfor %}
 </div>
 {% endblock %}
 

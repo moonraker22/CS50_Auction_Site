@@ -46,6 +46,7 @@ class Listing(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField(blank=True, null=True)
     slug = models.SlugField(max_length=50)
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="winner")
     # objects = models.Manager()
     # ListingManager = ListingManager()
 
@@ -104,6 +105,7 @@ class Bid(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(f"{self.user} bid ${self.amount}")
+        if not self.bid_time:
             self.bid_time = timezone.now()
             super().save(*args, **kwargs)
 

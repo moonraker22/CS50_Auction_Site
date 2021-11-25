@@ -1,6 +1,12 @@
 {% extends "auctions/layout.html" %}
 {% load prepend_dollars %}
 {% block body %}
+<style>
+    .image {
+        width: 350px;
+        height: 350px;
+    }
+</style>
 <div class="container">
     <div class="row">
         <p class="display-3 text-center" id="test">{{ category }}</p>
@@ -9,7 +15,7 @@
             {% for listing in listings %} {% if listing.is_active %}
             <div class="col-md-4">
                 <div class="card mb-4 shadow-lg">
-                    <img class="card-img-top" src="{{ listing.image_url }}" alt="{{ listing.title }}">
+                    <img class="card-img-top img-fluid image" src="{{ listing.image_url }}" alt="{{ listing.title }}">
                     <div class="card-body">
                         <p class="card-text"><strong>{{ listing.title }}</strong></p>
                         <p class="card-text">{{ listing.description }}</p>
